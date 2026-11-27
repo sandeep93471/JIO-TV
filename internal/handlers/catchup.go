@@ -194,6 +194,12 @@ func CatchupPlayerHandler(c *fiber.Ctx) error {
 	episodePoster := c.Query("poster", "")
 	showTime := c.Query("showtime", "")
 
+	poster := episodePoster
+	if poster != "" && !strings.HasPrefix(poster, "http") {
+		poster = "https://jiotvimages.cdn.jio.com/dare_images/shows/" + poster
+	}
+	RecordWatch(showName, showTime, poster, c.OriginalURL())
+
 	playerURL := fmt.Sprintf("/catchup/render/%s?start=%s&end=%s&srno=%s&v=6", id, start, end, srno)
 
 	return c.Render("views/catchup_player", fiber.Map{

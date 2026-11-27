@@ -1210,6 +1210,19 @@ func PremiumProviderPlayHandler(c *fiber.Ctx) error {
 		return ErrorMessageHandler(c, err)
 	}
 
+	// Record the play in Continue Watching. For provider/vod requests the
+	// metadata API supplies a proper title and artwork; on a miss (e.g.
+	// provider-scoped live channels) the item is simply not recorded.
+	contentID := playRequest.ChannelID
+	if contentID == "" {
+		contentID = playRequest.ContentID
+	}
+	if contentID != "" {
+		if meta, metaErr := television.PremiumProviderVodMetadata(contentID, 0); metaErr == nil && meta != nil && meta.Name != "" {
+			RecordWatch(meta.Name, meta.Provider, meta.PosterURL(), "/premium/providers/"+url.PathEscape(c.Params("id"))+"/item/"+url.PathEscape(contentID))
+		}
+	}
+
 	// Premium provider content is usually DASH protected by Widevine, so it
 	// has to be rendered by the DRM player rather than the HLS player.
 	if playbackResult.HasDRMStream() {
@@ -1218,8 +1231,19 @@ func PremiumProviderPlayHandler(c *fiber.Ctx) error {
 			return internalUtils.InternalServerError(c, drmErr)
 		}
 		if drmMpdOutput.IsDRM {
+			playURL := drmMpdOutput.PlayUrl
+			if !strings.HasPrefix(playURL, "/render.mpd") {
+				// Timesplay VOD returns a raw CDN URL that browsers cannot
+				// load directly: the CDN rejects browser User-Agents and the
+				// cross-origin fetches lack the JioTV headers only the proxy
+				// adds. Route the manifest through /render.mpd like regular
+				// DRM channels so manifest and segments stay same-origin.
+				if proxiedURL, urlErr := proxiedPremiumMpdURL(playbackResult, c.Query("q")); urlErr == nil {
+					playURL = proxiedURL
+				}
+			}
 			return c.Render("views/player_drm", fiber.Map{
-				"play_url":     drmMpdOutput.PlayUrl,
+				"play_url":     playURL,
 				"license_url":  drmMpdOutput.LicenseUrl,
 				"channel_host": drmMpdOutput.Tv_url_host,
 				"channel_path": drmMpdOutput.Tv_url_path,
@@ -1263,6 +1287,27 @@ func PremiumPlayerHandler(c *fiber.Ctx) error {
 	})
 }
 
+// proxiedPremiumMpdURL builds a /render.mpd proxy URL for a premium playback
+// result whose raw MPD URL cannot be loaded directly by the browser. The
+// channel_id query param is intentionally omitted: it is a provider ID, not a
+// channel ID, so MpdHandler skips its TV.Live refresh and proxies the VOD
+// manifest URL unchanged.
+func proxiedPremiumMpdURL(playbackResult *television.LiveURLOutput, quality string) (string, error) {
+	bitrates := playbackResult.Mpd.ResolvedBitrates()
+	tvURL := internalUtils.SelectQuality(quality, bitrates.Auto, bitrates.High, bitrates.Medium, bitrates.Low)
+	if tvURL == "" {
+		tvURL = playbackResult.Mpd.Result
+	}
+	if tvURL == "" {
+		return "", errors.New("no MPD URL in playback result")
+	}
+	encryptedURL, err := secureurl.EncryptURL(tvURL)
+	if err != nil {
+		return "", err
+	}
+	return "/render.mpd?auth=" + encryptedURL + "&q=" + quality, nil
+}
+
 // PlayHandler loads HTML Page with video player iframe embedded with video URL
 // URL is generated from the channel ID
 func PlayHandler(c *fiber.Ctx) error {
@@ -1295,6 +1340,7 @@ func PlayHandler(c *fiber.Ctx) error {
 		player_url = "/player/" + id + "?q=" + quality
 	}
 	playerURLJSON, _ := json.Marshal(player_url)
+	recordChannelWatch(id, c.OriginalURL())
 	internalUtils.SetCacheHeader(c, 3600)
 	return c.Render("views/play", fiber.Map{
 		"Title":         Title,

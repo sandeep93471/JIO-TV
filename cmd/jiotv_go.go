@@ -105,6 +105,8 @@ func JioTVServer(jiotvServerConfig JioTVServerConfig) error {
 	handlers.Init()
 
 	app.Get("/", handlers.IndexHandler)
+	app.Get("/home", handlers.AppHomeHandler)
+	app.Get("/home/seeall", handlers.AppSeeAllHandler)
 	app.Post("/login/sendOTP", handlers.LoginSendOTPHandler)
 	app.Post("/login/verifyOTP", handlers.LoginVerifyOTPHandler)
 	app.Get("/logout", handlers.LogoutHandler)

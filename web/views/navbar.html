@@ -85,8 +85,19 @@
       </span>
       <span class="text-lg font-bold tracking-tight">{{ .Title }}</span>
     </a>
+    <a href="/home" class="ml-3 text-sm font-semibold text-base-content/70 hover:text-primary" aria-label="App-style home with curated rails">Home</a>
   </div>
   <div class="navbar-end gap-1 sm:gap-4 flex-wrap justify-end">
+    <form action="/search" method="get" class="flex items-center" role="search">
+      <input
+        type="search"
+        name="q"
+        placeholder="Search"
+        value="{{ .Query }}"
+        class="input input-sm input-bordered rounded-xl w-28 sm:w-44"
+        aria-label="Search channels and premium content"
+      />
+    </form>
     {{ if .player_url }}
     <label class="flex items-center gap-2 cursor-pointer">
       <span id="player-mode-label" class="font-medium text-xs sm:text-sm text-base-content/70">auto</span>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ .Title }}</title>
+    {{ template "styling" . }}
+    <style>
+      .rail-scroll {
+        display: flex;
+        gap: 0.75rem;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        padding-bottom: 0.5rem;
+        scrollbar-width: thin;
+      }
+      .rail-scroll > * {
+        scroll-snap-align: start;
+        flex: none;
+      }
+      .rail-card {
+        width: 11rem;
+      }
+      @media (min-width: 640px) {
+        .rail-card {
+          width: 13rem;
+        }
+      }
+      .tab-pills {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .tab-pills::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    {{ template "navbar" . }}
+
+    <div class="container mx-auto p-4">
+      {{if not .SeeAll}}
+      <div class="tab-pills mb-6">
+        {{range $tab := .Tabs}}
+        <a
+          href="/home?tab={{$tab.ID}}"
+          class="btn btn-sm rounded-full whitespace-nowrap {{if eq $tab.ID $.SelectedTab}}btn-primary{{else}}btn-ghost border border-base-300{{end}}"
+          aria-current="{{if eq $tab.ID $.SelectedTab}}page{{else}}false{{end}}"
+        >{{$tab.Name}}</a>
+        {{end}}
+      </div>
+      {{else}}
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <h1 class="text-2xl font-bold">{{if .SeeAllName}}{{.SeeAllName}}{{else}}See all{{end}}</h1>
+        <a href="/home" class="btn btn-ghost rounded-xl">Back to home</a>
+      </div>
+      {{end}}
+
+      {{if .Error}}
+      <p class="text-sm text-error mb-4">{{.Error}}</p>
+      {{end}}
+
+      {{if .Items}}
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {{range $item := .Items}}
+        <a
+          href="{{$item.URL}}"
+          class="card relative border border-primary shadow-lg hover:shadow-xl hover:bg-base-300 transition-all duration-200 ease-in-out scale-100 hover:scale-105"
+        >
+          <figure class="aspect-video overflow-hidden rounded-t-xl bg-gray-800">
+            {{if $item.ImageURL}}
+            <img src="{{$item.ImageURL}}" loading="lazy" alt="{{$item.Title}}" class="w-full h-full object-cover" />
+            {{else}}
+            <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+            {{end}}
+          </figure>
+          {{if $item.IsPremium}}
+          <span class="badge badge-warning badge-sm absolute top-2 right-2">Premium</span>
+          {{end}}
+          {{if $item.IsLiveNow}}
+          <span class="badge badge-error badge-sm absolute top-2 left-2">LIVE</span>
+          {{end}}
+          <div class="p-2 sm:p-3">
+            <h2 class="font-bold text-sm line-clamp-2">{{$item.Title}}</h2>
+            {{if $item.Subtitle}}
+            <p class="text-xs text-gray-500 line-clamp-1 mt-1">{{$item.Subtitle}}</p>
+            {{end}}
+          </div>
+        </a>
+        {{end}}
+      </div>
+      {{end}}
+
+      {{range $rail := .Rails}}
+      <section class="mb-8">
+        <div class="flex items-center justify-between gap-3 mb-3">
+          <h2 class="text-lg font-bold">{{$rail.Name}}</h2>
+          {{if $rail.SeeAllURL}}
+          <a href="{{$rail.SeeAllURL}}" class="text-sm text-primary hover:underline whitespace-nowrap">See all</a>
+          {{end}}
+        </div>
+        <div class="rail-scroll">
+          {{range $item := $rail.Items}}
+          <a
+            href="{{$item.URL}}"
+            class="rail-card card relative border border-primary shadow-md hover:shadow-xl hover:bg-base-300 transition-all duration-200 ease-in-out hover:scale-105"
+          >
+            <figure class="aspect-video overflow-hidden rounded-t-xl bg-gray-800">
+              {{if $item.ImageURL}}
+              <img src="{{$item.ImageURL}}" loading="lazy" alt="{{$item.Title}}" class="w-full h-full object-cover" />
+              {{else}}
+              <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+              {{end}}
+            </figure>
+            {{if $item.IsPremium}}
+            <span class="badge badge-warning badge-sm absolute top-2 right-2">Premium</span>
+            {{end}}
+            {{if $item.IsLiveNow}}
+            <span class="badge badge-error badge-sm absolute top-2 left-2">LIVE</span>
+            {{end}}
+            <div class="p-2">
+              <h3 class="font-semibold text-sm line-clamp-2">{{$item.Title}}</h3>
+              {{if $item.Subtitle}}
+              <p class="text-xs text-gray-500 line-clamp-1 mt-1">{{$item.Subtitle}}</p>
+              {{end}}
+            </div>
+          </a>
+          {{end}}
+        </div>
+      </section>
+      {{end}}
+
+      {{if and (not .Items) (not .Rails) (not .Error)}}
+      <div class="p-6 text-center border border-primary rounded-xl">
+        <h2 class="text-lg font-semibold">Nothing here yet</h2>
+        <p class="mt-2 text-sm text-gray-500">
+          Home rails come from your JioTV account — try again in a moment.
+        </p>
+      </div>
+      {{end}}
+    </div>
+
+    {{ template "footer" . }}
+  </body>
+</html>

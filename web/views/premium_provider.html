@@ -18,7 +18,17 @@
             Browse premium items and play them directly in the web player.
           </p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <form action="/search" method="get" class="flex items-center" role="search">
+            <input type="hidden" name="p" value="{{.ProviderID}}" />
+            <input
+              type="search"
+              name="q"
+              placeholder="Search {{.ProviderName}}"
+              class="input input-sm input-bordered rounded-xl w-44 sm:w-56"
+              aria-label="Search within {{.ProviderName}} catalog"
+            />
+          </form>
           <a href="/" class="btn btn-ghost rounded-xl">Back to channels</a>
           {{if .ProviderURL}}
           <a href="{{.ProviderURL}}" target="_blank" rel="noopener noreferrer" class="btn btn-outline rounded-xl">Open provider site</a>
@@ -33,7 +43,7 @@
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {{range $item := .Items}}
         <a
-          href="/premium/providers/{{$.ProviderID}}/play?streamType={{$item.StreamType}}{{if $item.ChannelID}}&channelId={{$item.ChannelID}}{{end}}{{if $item.ContentID}}&contentId={{$item.ContentID}}{{end}}{{if $item.SubCategoryID}}&subCategoryId={{$item.SubCategoryID}}{{end}}"
+          href="/premium/providers/{{$.ProviderID}}/item/{{$item.ID}}"
           class="card relative border border-primary shadow-lg hover:shadow-xl hover:bg-base-300 transition-all duration-200 ease-in-out scale-100 hover:scale-105"
         >
           <figure class="aspect-[2/3] overflow-hidden rounded-t-xl bg-gray-200">

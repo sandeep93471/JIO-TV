@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ .Title }}</title>
+    {{ template "styling" . }}
+  </head>
+
+  <body>
+    {{ template "navbar" . }}
+
+    <div class="container mx-auto p-4">
+      {{if .NotFound}}
+      <div class="p-6 text-center border border-primary rounded-xl">
+        <h1 class="text-lg font-semibold">Item not found</h1>
+        <p class="mt-2 text-sm text-gray-500">
+          This entry is not in the catalog index yet. If the index is still
+          building, try again shortly.
+        </p>
+        <div class="mt-4 flex justify-center gap-2">
+          <a href="/premium/providers/{{.ProviderID}}/watch" class="btn btn-primary rounded-xl">Browse provider</a>
+          <a href="/" class="btn btn-ghost rounded-xl">Back to channels</a>
+        </div>
+      </div>
+      {{else}}
+      <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div>
+          <h1 class="text-2xl font-bold">{{ .HeroTitle }}</h1>
+          <p class="text-sm text-gray-500 mt-1">{{ .ProviderName }}{{if .HeroSubtitle}} &middot; {{ .HeroSubtitle }}{{end}}</p>
+        </div>
+        <a href="/premium/providers/{{.ProviderID}}/watch" class="btn btn-ghost rounded-xl">Browse {{ .ProviderName }}</a>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-5 mb-8">
+        <figure class="w-40 sm:w-52 shrink-0 aspect-[2/3] overflow-hidden rounded-xl bg-gray-200 border border-primary">
+          {{if .HeroImage}}
+          <img src="{{.HeroImage}}" alt="{{.HeroTitle}}" class="w-full h-full object-cover" />
+          {{else}}
+          <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+          {{end}}
+        </figure>
+        <div class="flex-1">
+          {{if .HeroDescription}}
+          <p class="text-sm sm:text-base text-base-content/80">{{ .HeroDescription }}</p>
+          {{end}}
+          {{if .HeroTags}}
+          <div class="flex flex-wrap gap-1 mt-3">
+            {{range $tag := .HeroTags}}
+            <span class="badge badge-outline text-xs">{{ $tag }}</span>
+            {{end}}
+          </div>
+          {{end}}
+          <div class="mt-5 flex flex-wrap gap-2">
+            <a href="{{.PlayURL}}" class="btn btn-primary rounded-xl">Play now</a>
+          </div>
+        </div>
+      </div>
+
+      {{if .Seasons}}
+      <div class="mb-8">
+        <div class="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Seasons">
+          {{range $season := .Seasons}}
+          <a
+            href="?season={{$season}}"
+            class="btn btn-sm rounded-xl {{if eq $season $.SelectedSeason}}btn-primary{{else}}btn-outline{{end}}"
+          >Season {{$season}}</a>
+          {{end}}
+        </div>
+
+        {{if .Episodes}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {{range $ep := .Episodes}}
+          <div class="card border border-primary shadow-md">
+            <figure class="aspect-video overflow-hidden rounded-t-xl bg-gray-200">
+              {{if $ep.ImageURL}}
+              <img src="{{$ep.ImageURL}}" loading="lazy" alt="{{$ep.Name}}" class="w-full h-full object-cover" />
+              {{else}}
+              <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+              {{end}}
+            </figure>
+            <div class="p-3">
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="font-bold text-sm line-clamp-1">
+                  {{if $ep.EpisodeNo}}E{{$ep.EpisodeNo}}{{if $ep.Name}} &middot; {{end}}{{end}}{{$ep.Name}}
+                </h3>
+                {{if $ep.DurationMin}}
+                <span class="text-xs text-gray-500 shrink-0">{{$ep.DurationMin}} min</span>
+                {{end}}
+              </div>
+              {{if $ep.Description}}
+              <p class="text-xs text-gray-500 line-clamp-2 mt-1">{{$ep.Description}}</p>
+              {{end}}
+              <a href="{{$ep.PlayURL}}" class="btn btn-primary btn-sm rounded-xl mt-3 w-full">Play</a>
+            </div>
+          </div>
+          {{end}}
+        </div>
+        {{else}}
+        <p class="text-sm text-gray-500">No episodes available for this season.</p>
+        {{end}}
+      </div>
+      {{end}}
+
+      {{if .Related}}
+      <h2 class="text-xl font-bold mt-2 mb-3">More like this</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+        {{range $result := .Related}}
+        <a
+          href="{{$result.DetailURL}}"
+          class="card relative border border-primary shadow-lg hover:shadow-xl hover:bg-base-300 transition-all duration-200 ease-in-out scale-100 hover:scale-105"
+        >
+          <figure class="aspect-[2/3] overflow-hidden rounded-t-xl bg-gray-200">
+            {{if $result.Item.ImageURL}}
+            <img src="{{$result.Item.ImageURL}}" loading="lazy" alt="{{$result.Item.Title}}" class="w-full h-full object-cover" />
+            {{else}}
+            <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+            {{end}}
+          </figure>
+          <div class="p-2 sm:p-3">
+            <h2 class="font-bold text-sm line-clamp-2">{{$result.Item.Title}}</h2>
+            <p class="text-xs text-gray-500 line-clamp-1 mt-1">
+              {{$result.ProviderName}}{{if $result.Item.Subtitle}} &middot; {{$result.Item.Subtitle}}{{end}}
+            </p>
+          </div>
+        </a>
+        {{end}}
+      </div>
+      {{end}}
+      {{end}}
+    </div>
+
+    {{ template "login_dialog" . }}
+    <script src="/static/internal/utils.js"></script>
+    <script src="/static/internal/common.js"></script>
+    {{ template "footer" . }}
+  </body>
+</html>

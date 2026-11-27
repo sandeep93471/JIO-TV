@@ -139,6 +139,311 @@ a.card[data-channel-id]:focus-visible {
   outline-offset: 2px;
 }
 
+/* --- Media cards -----------------------------------------------------------
+   Shared hover language for poster/programme cards on home rails, search
+   results and provider grids: image zoom, bottom scrim, and a play button
+   that fades in over the artwork. */
+
+.media-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-box, 1.25rem);
+  border: 1px solid color-mix(in oklab, var(--color-primary) 22%, transparent);
+  background: var(--color-base-100);
+  box-shadow: 0 6px 18px -10px rgba(0, 0, 0, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.media-card:hover,
+.media-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: color-mix(in oklab, var(--color-primary) 65%, transparent);
+  box-shadow: 0 16px 34px -12px color-mix(in oklab, var(--color-primary) 40%, transparent);
+}
+.media-card img {
+  transition: transform 0.4s ease;
+}
+.media-card:hover img,
+.media-card:focus-visible img {
+  transform: scale(1.07);
+}
+.media-card .card-scrim {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 55%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), transparent);
+  pointer-events: none;
+}
+.media-card .play-fab {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3rem;
+  height: 3rem;
+  margin: -1.5rem 0 0 -1.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in oklab, var(--color-primary) 88%, black 12%);
+  color: var(--color-primary-content);
+  box-shadow: 0 8px 22px -6px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transform: scale(0.75);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.media-card:hover .play-fab,
+.media-card:focus-visible .play-fab {
+  opacity: 1;
+  transform: scale(1);
+}
+.media-card .play-fab::after {
+  content: "";
+  display: block;
+  margin-left: 0.22rem;
+  border-left: 0.95rem solid currentColor;
+  border-top: 0.6rem solid transparent;
+  border-bottom: 0.6rem solid transparent;
+}
+
+/* Shimmering backdrop shown behind poster art while the image loads. */
+.poster-shell {
+  background: linear-gradient(
+    110deg,
+    var(--color-base-300) 30%,
+    color-mix(in oklab, var(--color-base-300) 60%, white) 45%,
+    var(--color-base-300) 60%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -220% 0;
+  }
+}
+
+/* LIVE badge with a pulsing red dot, like the app's airing-now marker. */
+.badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-error);
+  color: var(--color-error-content, #fff);
+  font-weight: 700;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+}
+.badge-live::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: livepulse 1.4s ease-in-out infinite;
+}
+@keyframes livepulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.7);
+  }
+}
+
+/* Small meta pill (provider, language, duration, episode number). */
+.chip-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: color-mix(in oklab, var(--color-base-300) 70%, transparent);
+  color: var(--color-base-content);
+  backdrop-filter: blur(6px);
+}
+
+/* Section heading with a small gradient accent bar, like the app's rail
+   titles but sharper. */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.section-head::before {
+  content: "";
+  width: 0.32rem;
+  height: 1.15rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  flex: none;
+}
+
+/* --- Rails: arrow controls + edge fades ---------------------------------- */
+
+.rail-shell {
+  position: relative;
+}
+.rail-shell .rail-mask {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 2.4rem,
+    black calc(100% - 2.4rem),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 2.4rem,
+    black calc(100% - 2.4rem),
+    transparent
+  );
+}
+.rail-btn {
+  position: absolute;
+  top: 35%;
+  z-index: 10;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: color-mix(in oklab, var(--color-base-100) 82%, transparent);
+  color: var(--color-base-content);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(-50%) scale(0.9);
+  transition: opacity 0.18s ease, transform 0.18s ease,
+    background-color 0.18s ease;
+}
+.rail-shell:hover .rail-btn,
+.rail-btn:focus-visible {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+.rail-btn:hover {
+  background: var(--color-primary);
+  color: var(--color-primary-content);
+}
+.rail-btn.rail-prev {
+  left: -0.4rem;
+}
+.rail-btn.rail-next {
+  right: -0.4rem;
+}
+.rail-btn[disabled] {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* --- Hero spotlight ---------------------------------------------------------
+   Large featured banner on /home — the streaming-app "billboard" slot. */
+
+.hero-spot {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-box, 1.25rem);
+  border: 1px solid color-mix(in oklab, var(--color-primary) 25%, transparent);
+  box-shadow: 0 20px 45px -18px rgba(0, 0, 0, 0.65);
+}
+.hero-spot img.hero-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero-spot .hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+      to right,
+      color-mix(in oklab, var(--color-base-200) 92%, transparent) 0%,
+      color-mix(in oklab, var(--color-base-200) 55%, transparent) 42%,
+      transparent 75%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-base-200) 90%, transparent),
+      transparent 55%
+    );
+}
+.hero-spot .hero-copy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem 1.75rem;
+  max-width: 34rem;
+}
+
+/* --- Cinematic detail hero (premium item page) ---------------------------- */
+
+.detail-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-box, 1.25rem);
+  border: 1px solid color-mix(in oklab, var(--color-primary) 22%, transparent);
+}
+.detail-hero .detail-backdrop {
+  position: absolute;
+  inset: -1.5rem;
+  background-size: cover;
+  background-position: center 25%;
+  filter: blur(28px) saturate(1.15);
+  transform: scale(1.15);
+  opacity: 0.55;
+}
+.detail-hero .detail-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    var(--color-base-200) 4%,
+    color-mix(in oklab, var(--color-base-200) 72%, transparent) 55%,
+    color-mix(in oklab, var(--color-base-200) 45%, transparent)
+  );
+}
+.detail-hero .detail-body {
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.75rem;
+}
+
+/* Tab pills on /home — gradient ring on the active tab. */
+.tab-pill {
+  border-radius: 9999px;
+  border: 1px solid var(--color-base-300);
+  transition: all 0.18s ease;
+}
+.tab-pill.tab-active {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-secondary)
+  );
+  color: var(--color-primary-content);
+  border-color: transparent;
+  box-shadow: 0 6px 18px -6px
+    color-mix(in oklab, var(--color-primary) 55%, transparent);
+}
+
 /* Brand gradient used for the logo chip and headline accents.
    Jio look: brand blue sweeping into cyan, like the Jio swoosh. */
 .brand-gradient {

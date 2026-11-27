@@ -166,11 +166,30 @@ func AppHomeHandler(c *fiber.Ctx) error {
 		pageError = "Could not load home rails right now"
 	}
 
+	// Spotlight hero: first image-backed item from the first content rail
+	// (skipping Continue Watching, which is personal rather than editorial).
+	var hero *appRailItemView
+	for _, rail := range rails {
+		if rail.Name == "Continue Watching" {
+			continue
+		}
+		for i := range rail.Items {
+			if rail.Items[i].ImageURL != "" {
+				hero = &rail.Items[i]
+				break
+			}
+		}
+		if hero != nil {
+			break
+		}
+	}
+
 	return c.Render("views/app_home", fiber.Map{
 		"Title":         Title,
 		"Tabs":          appHomeTabs,
 		"SelectedTab":   tabID,
 		"Rails":         rails,
+		"Hero":          hero,
 		"Error":         pageError,
 		"IsNotLoggedIn": !utils.CheckLoggedIn(),
 	})

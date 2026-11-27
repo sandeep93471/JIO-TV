@@ -10,60 +10,63 @@
   <body>
     {{ template "navbar" . }}
 
-    <div class="container mx-auto p-4">
+    <div class="container mx-auto px-4 pb-8">
       {{if .NotFound}}
-      <div class="p-6 text-center border border-primary rounded-xl">
+      <div class="p-8 text-center border border-primary/40 rounded-2xl mt-6">
         <h1 class="text-lg font-semibold">Item not found</h1>
-        <p class="mt-2 text-sm text-gray-500">
+        <p class="mt-2 text-sm text-base-content/55">
           This entry is not in the catalog index yet. If the index is still
           building, try again shortly.
         </p>
         <div class="mt-4 flex justify-center gap-2">
-          <a href="/premium/providers/{{.ProviderID}}/watch" class="btn btn-primary rounded-xl">Browse provider</a>
-          <a href="/" class="btn btn-ghost rounded-xl">Back to channels</a>
+          <a href="/premium/providers/{{.ProviderID}}/watch" class="btn btn-primary rounded-full">Browse provider</a>
+          <a href="/" class="btn btn-ghost rounded-full">Back to channels</a>
         </div>
       </div>
       {{else}}
-      <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
-        <div>
-          <h1 class="text-2xl font-bold">{{ .HeroTitle }}</h1>
-          <p class="text-sm text-gray-500 mt-1">{{ .ProviderName }}{{if .HeroSubtitle}} &middot; {{ .HeroSubtitle }}{{end}}</p>
-        </div>
-        <a href="/premium/providers/{{.ProviderID}}/watch" class="btn btn-ghost rounded-xl">Browse {{ .ProviderName }}</a>
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-5 mb-8">
-        <figure class="w-40 sm:w-52 shrink-0 aspect-[2/3] overflow-hidden rounded-xl bg-gray-200 border border-primary">
-          {{if .HeroImage}}
-          <img src="{{.HeroImage}}" alt="{{.HeroTitle}}" class="w-full h-full object-cover" />
-          {{else}}
-          <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
-          {{end}}
-        </figure>
-        <div class="flex-1">
-          {{if .HeroDescription}}
-          <p class="text-sm sm:text-base text-base-content/80">{{ .HeroDescription }}</p>
-          {{end}}
-          {{if .HeroTags}}
-          <div class="flex flex-wrap gap-1 mt-3">
-            {{range $tag := .HeroTags}}
-            <span class="badge badge-outline text-xs">{{ $tag }}</span>
+      <div class="detail-hero mb-8 mt-4">
+        {{if .HeroImage}}
+        <div class="detail-backdrop" style="background-image: url('{{.HeroImage}}');"></div>
+        {{else}}
+        <div class="detail-backdrop" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));"></div>
+        {{end}}
+        <div class="detail-veil"></div>
+        <div class="detail-body flex-col sm:flex-row">
+          <figure class="w-36 sm:w-48 shrink-0 aspect-[2/3] overflow-hidden rounded-xl shadow-2xl border border-white/10 poster-shell">
+            {{if .HeroImage}}
+            <img src="{{.HeroImage}}" alt="{{.HeroTitle}}" class="w-full h-full object-cover" />
+            {{else}}
+            <div class="w-full h-full flex items-center justify-center text-xs text-base-content/40">No image</div>
             {{end}}
-          </div>
-          {{end}}
-          <div class="mt-5 flex flex-wrap gap-2">
-            <a href="{{.PlayURL}}" class="btn btn-primary rounded-xl">Play now</a>
+          </figure>
+          <div class="flex-1 min-w-0 flex flex-col justify-end">
+            <div class="flex flex-wrap gap-1.5 mb-3">
+              <span class="chip-meta" style="background: color-mix(in oklab, var(--color-primary) 80%, black 20%); color: var(--color-primary-content);">{{ .ProviderName }}</span>
+              {{if .HeroSubtitle}}<span class="chip-meta">{{ .HeroSubtitle }}</span>{{end}}
+              {{range $tag := .HeroTags}}<span class="chip-meta">{{ $tag }}</span>{{end}}
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight line-clamp-2">{{ .HeroTitle }}</h1>
+            {{if .HeroDescription}}
+            <p class="text-sm sm:text-base text-base-content/75 mt-3 line-clamp-4 max-w-3xl">{{ .HeroDescription }}</p>
+            {{end}}
+            <div class="mt-5 flex flex-wrap items-center gap-2">
+              <a href="{{.PlayURL}}" class="btn btn-primary rounded-full gap-2 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5" aria-hidden="true"><path d="M8 5.14v14.72a.5.5 0 0 0 .76.42l11.5-7.36a.5.5 0 0 0 0-.84L8.76 4.72A.5.5 0 0 0 8 5.14Z"/></svg>
+                Play now
+              </a>
+              <a href="/premium/providers/{{.ProviderID}}/watch" class="btn btn-ghost rounded-full">Browse {{ .ProviderName }}</a>
+            </div>
           </div>
         </div>
       </div>
 
       {{if .Seasons}}
       <div class="mb-8">
-        <div class="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Seasons">
+        <div class="flex flex-wrap gap-2 mb-5" role="tablist" aria-label="Seasons">
           {{range $season := .Seasons}}
           <a
             href="?season={{$season}}"
-            class="btn btn-sm rounded-xl {{if eq $season $.SelectedSeason}}btn-primary{{else}}btn-outline{{end}}"
+            class="tab-pill btn btn-sm {{if eq $season $.SelectedSeason}}tab-active border-0{{else}}btn-outline{{end}}"
           >Season {{$season}}</a>
           {{end}}
         </div>
@@ -71,55 +74,58 @@
         {{if .Episodes}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {{range $ep := .Episodes}}
-          <div class="card border border-primary shadow-md">
-            <figure class="aspect-video overflow-hidden rounded-t-xl bg-gray-200">
+          <a href="{{$ep.PlayURL}}" class="media-card block" aria-label="Play episode {{$ep.EpisodeNo}}: {{$ep.Name}}">
+            <figure class="aspect-video overflow-hidden poster-shell">
               {{if $ep.ImageURL}}
               <img src="{{$ep.ImageURL}}" loading="lazy" alt="{{$ep.Name}}" class="w-full h-full object-cover" />
               {{else}}
-              <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+              <div class="w-full h-full flex items-center justify-center text-xs text-base-content/40">No image</div>
               {{end}}
             </figure>
-            <div class="p-3">
-              <div class="flex items-center justify-between gap-2">
-                <h3 class="font-bold text-sm line-clamp-1">
-                  {{if $ep.EpisodeNo}}E{{$ep.EpisodeNo}}{{if $ep.Name}} &middot; {{end}}{{end}}{{$ep.Name}}
-                </h3>
-                {{if $ep.DurationMin}}
-                <span class="text-xs text-gray-500 shrink-0">{{$ep.DurationMin}} min</span>
-                {{end}}
-              </div>
+            <div class="card-scrim"></div>
+            <span class="play-fab" aria-hidden="true"></span>
+            {{if $ep.EpisodeNo}}
+            <span class="chip-meta absolute top-2 left-2 shadow" style="background: rgba(0,0,0,0.62); color: #fff;">E{{$ep.EpisodeNo}}</span>
+            {{end}}
+            {{if $ep.DurationMin}}
+            <span class="chip-meta absolute top-2 right-2 shadow" style="background: rgba(0,0,0,0.62); color: #fff;">{{$ep.DurationMin}} min</span>
+            {{end}}
+            <div class="relative p-3">
+              <h3 class="font-bold text-sm line-clamp-1">
+                {{if $ep.Name}}{{$ep.Name}}{{else}}Episode {{$ep.EpisodeNo}}{{end}}
+              </h3>
               {{if $ep.Description}}
-              <p class="text-xs text-gray-500 line-clamp-2 mt-1">{{$ep.Description}}</p>
+              <p class="text-xs text-base-content/55 line-clamp-2 mt-1">{{$ep.Description}}</p>
               {{end}}
-              <a href="{{$ep.PlayURL}}" class="btn btn-primary btn-sm rounded-xl mt-3 w-full">Play</a>
             </div>
-          </div>
+          </a>
           {{end}}
         </div>
         {{else}}
-        <p class="text-sm text-gray-500">No episodes available for this season.</p>
+        <p class="text-sm text-base-content/55">No episodes available for this season.</p>
         {{end}}
       </div>
       {{end}}
 
       {{if .Related}}
-      <h2 class="text-xl font-bold mt-2 mb-3">More like this</h2>
+      <h2 class="section-head text-xl font-bold mt-2 mb-4">More like this</h2>
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
         {{range $result := .Related}}
         <a
           href="{{$result.DetailURL}}"
-          class="card relative border border-primary shadow-lg hover:shadow-xl hover:bg-base-300 transition-all duration-200 ease-in-out scale-100 hover:scale-105"
+          class="media-card block"
         >
-          <figure class="aspect-[2/3] overflow-hidden rounded-t-xl bg-gray-200">
+          <figure class="aspect-[2/3] overflow-hidden poster-shell">
             {{if $result.Item.ImageURL}}
             <img src="{{$result.Item.ImageURL}}" loading="lazy" alt="{{$result.Item.Title}}" class="w-full h-full object-cover" />
             {{else}}
-            <div class="w-full h-full flex items-center justify-center text-xs text-gray-500">No image</div>
+            <div class="w-full h-full flex items-center justify-center text-xs text-base-content/40">No image</div>
             {{end}}
           </figure>
-          <div class="p-2 sm:p-3">
+          <div class="card-scrim"></div>
+          <div class="relative p-2 sm:p-3">
             <h2 class="font-bold text-sm line-clamp-2">{{$result.Item.Title}}</h2>
-            <p class="text-xs text-gray-500 line-clamp-1 mt-1">
+            <p class="text-xs text-base-content/55 line-clamp-1 mt-1">
               {{$result.ProviderName}}{{if $result.Item.Subtitle}} &middot; {{$result.Item.Subtitle}}{{end}}
             </p>
           </div>
@@ -133,6 +139,7 @@
     {{ template "login_dialog" . }}
     <script src="/static/internal/utils.js"></script>
     <script src="/static/internal/common.js"></script>
+    <script src="/static/internal/rails.js"></script>
     {{ template "footer" . }}
   </body>
 </html>

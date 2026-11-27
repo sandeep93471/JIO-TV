@@ -85,18 +85,24 @@
       </span>
       <span class="text-lg font-bold tracking-tight">{{ .Title }}</span>
     </a>
-    <a href="/home" class="ml-3 text-sm font-semibold text-base-content/70 hover:text-primary" aria-label="App-style home with curated rails">Home</a>
+    <div class="ml-4 hidden sm:flex items-center gap-1 text-sm font-semibold">
+      <a href="/home" class="px-3 py-1.5 rounded-full text-base-content/70 hover:text-primary hover:bg-primary/10 transition-colors" aria-label="App-style home with curated rails">Home</a>
+      <a href="/" class="px-3 py-1.5 rounded-full text-base-content/70 hover:text-primary hover:bg-primary/10 transition-colors" aria-label="Live TV channel grid">Live TV</a>
+    </div>
   </div>
   <div class="navbar-end gap-1 sm:gap-4 flex-wrap justify-end">
     <form action="/search" method="get" class="flex items-center" role="search">
-      <input
-        type="search"
-        name="q"
-        placeholder="Search"
-        value="{{ .Query }}"
-        class="input input-sm input-bordered rounded-xl w-28 sm:w-44"
-        aria-label="Search channels and premium content"
-      />
+      <label class="input input-sm input-bordered rounded-full w-32 sm:w-52 flex items-center gap-2 focus-within:outline-1 focus-within:outline-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 opacity-60" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <input
+          type="search"
+          name="q"
+          placeholder="Search"
+          value="{{ .Query }}"
+          class="grow"
+          aria-label="Search channels and premium content"
+        />
+      </label>
     </form>
     {{ if .player_url }}
     <label class="flex items-center gap-2 cursor-pointer">
